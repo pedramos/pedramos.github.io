@@ -1,0 +1,11 @@
+<html>
+    <head>
+    	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="go-import" content="plramos.win/cmd git https://github.com/pedramos/cmd">
+        <meta http-equiv="refresh" content="0;URL='https://pkg.go.dev/plramos.win/cmd'">
+    </head>
+    <body>
+        Redirecting you to the <a href="https://pkg.go.dev/plramos.win/cmd">go doc page</a>...
+    </body>
+</html>
+

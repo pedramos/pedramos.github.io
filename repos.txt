@@ -1,0 +1,11 @@
+9fans
+acme-cmd
+AoC
+cmd
+gg
+Jira
+lang_detector
+ptscheduler
+rsc-cmd
+templ
+todo
