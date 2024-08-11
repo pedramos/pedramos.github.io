@@ -39,8 +39,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	os.RemoveAll("imports/")
-	os.MkdirAll("imports", 0777)
+	os.RemoveAll("docs/")
+	os.MkdirAll("docs", 0777)
 
 	t := template.Must(template.New("content").Parse(indexTPL))
 	for _, repo := range repos {
@@ -52,6 +52,6 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		os.WriteFile("imports/"+repo["name"].(string), buff.Bytes(), 0644)
+		os.WriteFile("docs/"+repo["name"].(string), buff.Bytes(), 0644)
 	}
 }
