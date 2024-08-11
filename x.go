@@ -52,6 +52,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		os.WriteFile("docs/"+repo["name"].(string)+".html", buff.Bytes(), 0644)
+		os.MkdirAll("docs/"+repo["name"].(string), 0777)
+		os.WriteFile("docs/"+repo["name"].(string)+"/index.html", buff.Bytes(), 0644)
 	}
 }
