@@ -1,10 +1,8 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
-	"errors"
 	"html/template"
 	"io"
 	"log"
@@ -22,7 +20,6 @@ const indexTPL = `<html>
         Redirecting you to the <a href="https://pkg.go.dev/plramos.win/{{index . "name"}}">go doc page</a>...
     </body>
 </html>
-
 `
 
 func main() {
@@ -42,28 +39,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	currReposLog, err := os.Open("repos.txt")
-	defer currReposLog.Close()
-	switch {
-	case err != nil && !errors.Is(err, os.ErrNotExist):
-		log.Fatalf("opening repos.txt: %w", err)
-	case errors.Is(err, os.ErrNotExist):
-		currReposLog, err = os.Create("repos.txt")
-		if err != nil {
-			log.Fatalf("creating repos.txt: %w", err)
-		}
-	default:
-		s := bufio.NewScanner(currReposLog)
-		for s.Scan() {
-			_ = os.Remove(s.Text())
-		}
-	}
-	if err != nil && !errors.Is(err, os.ErrNotExist) {
-		log.Fatalf("opening repos.txt: %w", err)
-	}
-	if !errors.Is(err, os.ErrNotExist) {
-	}
-	currReposLog.Truncate(0)
+	os.RemoveAll("imports/")
+	os.MkdirAll("imports", 0777)
 
 	t := template.Must(template.New("content").Parse(indexTPL))
 	for _, repo := range repos {
@@ -75,7 +52,6 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		os.WriteFile(repo["name"].(string), buff.Bytes(), 0644)
-		currReposLog.WriteString(repo["name"].(string) + "\n")
+		os.WriteFile("imports/"+repo["name"].(string), buff.Bytes(), 0644)
 	}
 }
