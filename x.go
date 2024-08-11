@@ -52,6 +52,6 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		os.WriteFile("docs/"+repo["name"].(string), buff.Bytes(), 0644)
+		os.WriteFile("docs/"+repo["name"].(string)+".html", buff.Bytes(), 0644)
 	}
 }
