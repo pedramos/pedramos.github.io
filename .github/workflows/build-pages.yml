@@ -1,5 +1,5 @@
 # Workflow for building and deploying a modgen site to GitHub Pages
-name: Deploy modgen with GitHub Pages
+name: Deploy go-redirect for plramos.win
 
 on:
   # Runs on pushes targeting the default branch

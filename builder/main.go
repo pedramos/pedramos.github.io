@@ -119,9 +119,10 @@ func main() {
 			fmt.Printf("WARN: %s", err)
 			continue
 		}
-		fmt.Println(r)
 		repos = append(repos, r...)
 	}
+
+	fmt.Println(r)
 
 	t := template.Must(template.New("content").Parse(indexTPL))
 	for _, repo := range repos {
