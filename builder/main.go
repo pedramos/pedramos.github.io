@@ -14,7 +14,8 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"slices"
+
+	"rsc.io/gitfs"
 )
 
 const indexTPL = `<html>
@@ -97,7 +98,7 @@ func main() {
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		log.Fatal(err)
 	}
-	repos = slices.Concat(r, repos)
+	repos = append(repos, r...)
 
 	if *dirFlag == "" {
 		return
@@ -112,8 +113,19 @@ func main() {
 		log.Fatalf("failed to create %s\n\t%s", *dirFlag, err)
 	}
 
+	for _, repo := range repos {
+		r, err := subPackages(repo)
+		if err != nil {
+			fmt.Printf("WARN: %s", err)
+			continue
+		}
+		fmt.Println(r)
+		repos = append(repos, r...)
+	}
+
 	t := template.Must(template.New("content").Parse(indexTPL))
 	for _, repo := range repos {
+
 		var buff bytes.Buffer
 		err := t.Execute(&buff, repo)
 		if err != nil {
@@ -129,4 +141,25 @@ func main() {
 			log.Fatalf("failed to create %s\n\t%s", path.Join(*dirFlag, repo, "index.html"), err)
 		}
 	}
+}
+
+func subPackages(repo string) (repos []string, err error) {
+	r, err := gitfs.NewRepo("https://github.com/pedramos/" + repo)
+	if err != nil {
+		return repos, err
+	}
+	_, repofs, err := r.Clone("HEAD")
+	if err != nil {
+		return repos, err
+	}
+	err = fs.WalkDir(repofs, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			repos = append(repos, repo+"/"+path)
+		}
+		return nil
+	})
+	return repos, err
 }
