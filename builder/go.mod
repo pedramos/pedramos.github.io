@@ -1,3 +1,3 @@
 module github.com/pedramos/pedramos.github.io/builder
 
-go 1.22.3
+go 1.23
