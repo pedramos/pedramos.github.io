@@ -1,0 +1,13 @@
+host: essaim.dev
+
+modules:
+  - path: /cmd
+    vcs: git
+    repo-url: https://github.com/pedrmaos/cmd
+  - path: /9fans
+    vcs: git
+    repo-url: https://github.com/pedramos/9fans
+  - path: /Jira
+    vcs: git
+    repo-url: https://github.com/pedramos/Jira
+
