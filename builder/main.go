@@ -4,13 +4,17 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"html/template"
 	"io"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
+	"path"
+	"slices"
 )
 
 const indexTPL = `<html>
@@ -26,8 +30,9 @@ const indexTPL = `<html>
 `
 
 var (
-	LsFlag        = flag.Bool("l", false, "Fetch github list")
-	reposFilePath = "repos.csv"
+	lsFlag    = flag.Bool("l", false, "Fetch github list")
+	reposFlag = flag.String("r", "repos.csv", "List of repos to include")
+	dirFlag   = flag.String("d", "", "Destination for build result")
 )
 
 func ListsReposGithub() ([]string, error) {
@@ -59,9 +64,9 @@ func ListsReposGithub() ([]string, error) {
 }
 
 func ListReposFile() ([]string, error) {
-	f, err := os.Open(reposFilePath)
+	f, err := os.Open(*reposFlag)
 	if err != nil {
-		return nil, fmt.Errorf("reading repos file: &w", err)
+		return nil, fmt.Errorf("reading repos file: %w", err)
 	}
 	s := bufio.NewScanner(f)
 
@@ -73,32 +78,55 @@ func ListReposFile() ([]string, error) {
 }
 
 func main() {
-
 	flag.Parse()
-	if *LsFlag {
-		repos, err := ListsReposGithub()
+	repos := []string{}
+
+	if *lsFlag {
+		var err error
+		repos, err = ListsReposGithub()
 		if err != nil {
 			log.Fatal(err)
 		}
+		fmt.Println("found on github")
 		for _, r := range repos {
-			fmt.Println(r)
+			fmt.Println("	- " + r)
 		}
 	}
-	os.RemoveAll("docs/")
-	os.MkdirAll("docs", 0777)
 
-	t := template.Must(template.New("content").Parse(indexTPL))
-	repos, err := ListReposFile()
-	if err != nil {
+	r, err := ListReposFile()
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		log.Fatal(err)
 	}
+	repos = slices.Concat(r, repos)
+
+	if *dirFlag == "" {
+		return
+	}
+	_, err = os.Stat(*dirFlag)
+	if err == nil || !errors.Is(err, fs.ErrNotExist) {
+		log.Fatalf("directory %s exists", *dirFlag)
+	}
+
+	err = os.MkdirAll(*dirFlag, 0o777)
+	if err != nil {
+		log.Fatalf("failed to create %s\n\t%s", *dirFlag, err)
+	}
+
+	t := template.Must(template.New("content").Parse(indexTPL))
 	for _, repo := range repos {
 		var buff bytes.Buffer
 		err := t.Execute(&buff, repo)
 		if err != nil {
-			log.Fatalf("building redirect for %s: %w", repo, err)
+			log.Fatalf("building redirect for %s: %s", repo, err)
 		}
-		os.MkdirAll("docs/"+repo, 0777)
-		os.WriteFile("docs/"+repo+"/index.html", buff.Bytes(), 0644)
+
+		os.MkdirAll(path.Join(*dirFlag, repo), 0o777)
+		if err != nil {
+			log.Fatalf("failed to create %s\n\t%s", path.Join(*dirFlag, repo), err)
+		}
+		os.WriteFile(path.Join(*dirFlag, repo, "index.html"), buff.Bytes(), 0o644)
+		if err != nil {
+			log.Fatalf("failed to create %s\n\t%s", path.Join(*dirFlag, repo, "index.html"), err)
+		}
 	}
 }
