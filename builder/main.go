@@ -122,7 +122,7 @@ func main() {
 		repos = append(repos, r...)
 	}
 
-	fmt.Println(r)
+	fmt.Println(repos)
 
 	t := template.Must(template.New("content").Parse(indexTPL))
 	for _, repo := range repos {
@@ -157,7 +157,7 @@ func subPackages(repo string) (repos []string, err error) {
 		if err != nil {
 			return err
 		}
-		if d.IsDir() {
+		if d.IsDir() && path != "." {
 			repos = append(repos, repo+"/"+path)
 		}
 		return nil
