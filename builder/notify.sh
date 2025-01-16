@@ -1,5 +1,5 @@
 #!/bin/sh
 
-. $HOME/lib/netlify_webhook.env
+. /$HOME/lib/cloudfare_webhook.env
 
-curl -s  -v -X POST -d {} $NETLIFY_WOOKURL | nobs
+curl -s -X POST "https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/$CF_WEBHOOKURL"
